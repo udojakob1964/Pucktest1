@@ -34,11 +34,11 @@ async function connectPuckJS() {
             if (value.includes("BTN_DOWN")) {
                 console.log("⬇️ Button wurde gedrückt!");
                 document.getElementById("status").innerText = "🟠 Button gedrückt!";
-                beep();
+                beep(300,100);
             } else if (value.includes("BTN_UP")) {
                 console.log("⬆️ Button wurde losgelassen!");
                 document.getElementById("status").innerText = "🟢 Verbunden, Button losgelassen!";
-                beep();
+                beep(1000,100);
             }
         });
 
