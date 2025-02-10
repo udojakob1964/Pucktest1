@@ -1,38 +1,69 @@
 <html>
  <head>
-   <style>
-     body { margin:0;  }
-     svg {
-       display:block; position:absolute;
-       top:0%; left:0%; width:100%; height:100%;
-     }
-   </style>    
+   
  </head>
  <body>
-  <svg viewBox="0 0 1 1">
-    <path fill="#000000" d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z" />
-  </svg>
+
   <script src="https://www.puck-js.com/puck.js"></script>
   <script type="text/javascript">
-    // Get the actual curve inside the SVG. You could make differemt
-    // parts of a more complex SVG do different things...
-    var path = document.getElementsByTagName('path')[0];
-    // Make sure your mouse cursor turns into a hand when over it, and gray it out
-    path.style="cursor:pointer;fill:#BBB";
 
-    function getLightValue() {
-      Puck.eval("Puck.light()", function(v) {
-        path.style.fill="rgb("+Math.round(v*255)+",0,0)";
-        setTimeout(function() {
-          getLightValue();
-        }, 250);
-      });
+   async function connectPuckJS() {
+    try {
+        console.log("🔍 Suche nach Puck.js...");
+
+        // 1️⃣ Suche nach einem Puck.js Gerät mit Nordic UART Service
+        const device = await navigator.bluetooth.requestDevice({
+            filters: [{ namePrefix: "Puck.js" }],
+            optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] // Nordic UART Service UUID
+        });
+
+        console.log(`✅ Gefunden: ${device.name}`);
+
+        // 2️⃣ Verbindung herstellen
+        const server = await device.gatt.connect();
+        console.log("🔗 Verbindung hergestellt!");
+
+        // 3️⃣ UART Service abrufen
+        const service = await server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
+
+        // 4️⃣ RX-Charakteristik (Datenempfang) abrufen
+        const characteristic = await service.getCharacteristic('6e400003-b5a3-f393-e0a9-e50e24dcca9e');
+
+        // 5️⃣ Benachrichtigungen aktivieren
+        await characteristic.startNotifications();
+        console.log("📡 Benachrichtigungen aktiviert!");
+
+        // 6️⃣ Event-Listener für Button-Events hinzufügen
+        characteristic.addEventListener('characteristicvaluechanged', (event) => {
+            let value = new TextDecoder().decode(event.target.value);
+            console.log(`🔹 Empfangene Daten: ${value}`);
+
+            if (value.includes("BTN_DOWN")) {
+                console.log("⬇️ Button wurde gedrückt!");
+            } else if (value.includes("BTN_UP")) {
+                console.log("⬆️ Button wurde losgelassen!");
+            }
+        });
+
+        // 7️⃣ Puck.js über UART befehlen, Button-Events zu senden
+        const txCharacteristic = await service.getCharacteristic('6e400002-b5a3-f393-e0a9-e50e24dcca9e');
+        const command = "setWatch(function(e) {Bluetooth.println(e.state ? 'BTN_DOWN' : 'BTN_UP');}, BTN, {edge:'both', debounce:50, repeat:true});\n";
+        await txCharacteristic.writeValue(new TextEncoder().encode(command));
+        console.log("🎯 Button-Event-Listener auf Puck.js aktiviert!");
+
+    } catch (error) {
+        console.error("❌ Fehler:", error);
     }
+}
 
-    // When clicked, start trying to get the light value
-    path.addEventListener("click", function() {
-      getLightValue();
-    });
+
+
+// 🔘 Button in HTML, um Verbindung zu starten
+document.querySelector("#connectButton").addEventListener("click", connectPuckJS);
+   
   </script>
+  
+  <button id="connectButton">🔗 Mit Puck.js verbinden</button>
+ 
  </body>
 </html>
