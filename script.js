@@ -43,7 +43,9 @@ async function connectPuckJS() {
         // 7️⃣ Puck.js über UART befehlen, Button-Events zu senden
         const txCharacteristic = await service.getCharacteristic('6e400002-b5a3-f393-e0a9-e50e24dcca9e');
         const command = "setWatch(function(e) {Bluetooth.println(e.state ? 'BTN_DOWN' : 'BTN_UP');}, BTN, {edge:'both', debounce:50, repeat:true});\n";
-        await txCharacteristic.writeValue(new TextEncoder().encode(command));
+        //await txCharacteristic.writeValue(new TextEncoder().encode(command));
+        // Schreibe den Befehl an Puck.js (ohne Response)
+        await txCharacteristic.writeValueWithoutResponse(new TextEncoder().encode(command));
         console.log("🎯 Button-Event-Listener auf Puck.js aktiviert!");
 
         // 8️⃣ Event, wenn die Verbindung getrennt wird
