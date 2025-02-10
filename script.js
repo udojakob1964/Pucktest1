@@ -44,17 +44,12 @@ async function connectPuckJS() {
         const txCharacteristic = await service.getCharacteristic('6e400002-b5a3-f393-e0a9-e50e24dcca9e');
 
         // 8️⃣ Korrigierter Befehl für Puck.js
-        const command = `
-E.on('init', function() {
-  setWatch(function(e) {
-    Bluetooth.println(e.state ? 'BTN_DOWN' : 'BTN_UP');
-  }, D0, {edge:'both', debounce:50, repeat:true});
-});
-\n`;
-
+        // const command = "setWatch(function(e) {Bluetooth.println(e.state ? 'BTN_DOWN' : 'BTN_UP');}, BTN, {edge:'both', debounce:50, repeat:true});\n";
+        // !!!! Command lässt sich irgendwie nicht auf den Puck übertragen. 
+        // => Als workaround: Einfach die Konsole (https://www.espruino.com/ide/) öffnen, verbinden, command pasten und ins RAM schreiben....
         // 9️⃣ Befehl an Puck.js senden
-        await txCharacteristic.writeValueWithoutResponse(new TextEncoder().encode(command));
-        console.log("🎯 Button-Event-Listener auf Puck.js aktiviert!");
+        //await txCharacteristic.writeValueWithoutResponse(new TextEncoder().encode(command));
+        // console.log("🎯 Button-Event-Listener auf Puck.js aktiviert!");
 
         // 🔟 Event, wenn die Verbindung getrennt wird
         device.addEventListener('gattserverdisconnected', () => {
