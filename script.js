@@ -34,9 +34,11 @@ async function connectPuckJS() {
             if (value.includes("BTN_DOWN")) {
                 console.log("⬇️ Button wurde gedrückt!");
                 document.getElementById("status").innerText = "🟠 Button gedrückt!";
+                beep();
             } else if (value.includes("BTN_UP")) {
                 console.log("⬆️ Button wurde losgelassen!");
                 document.getElementById("status").innerText = "🟢 Verbunden, Button losgelassen!";
+                beep();
             }
         });
 
@@ -63,5 +65,24 @@ async function connectPuckJS() {
     }
 }
 
+
 // 🔘 Verbindung mit Button starten
 document.querySelector("#connectButton").addEventListener("click", connectPuckJS);
+
+
+function beep(frequency = 440, duration = 500) {
+    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let oscillator = audioContext.createOscillator();
+    let gainNode = audioContext.createGain();
+
+    oscillator.type = "sine"; // Tonform: sine, square, triangle, sawtooth
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    setTimeout(() => {
+        oscillator.stop();
+        audioContext.close();
+    }, duration);
+}
