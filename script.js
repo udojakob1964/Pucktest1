@@ -49,7 +49,7 @@ async function connectPuckJS() {
         // => Als workaround: Einfach die Konsole (https://www.espruino.com/ide/) öffnen, verbinden, command pasten und ins RAM schreiben....
         // 9️⃣ Befehl an Puck.js senden
         //await txCharacteristic.writeValueWithoutResponse(new TextEncoder().encode(command));
-        // console.log("🎯 Button-Event-Listener auf Puck.js aktiviert!");
+        // console.log("🎯 Button-Event-Listener auf Puck.js aktiviert!"); 
 
         // 🔟 Event, wenn die Verbindung getrennt wird
         device.addEventListener('gattserverdisconnected', () => {
